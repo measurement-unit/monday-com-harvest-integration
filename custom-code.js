@@ -3,42 +3,38 @@ window._harvestPlatformConfig = {
     "skipStyling": false
 };
 
-function urlchanged(){  
-  var path = window.location.pathname;
+$(document).ready(function(){
+  const { pathname, href } = window.location;
+  if (isPulseView(pathname)) setTimeout(main(pathname), 1000);
   
-  // Check if we are viewing pulse details panel
-  if ( path.includes("/pulses/") ) {
+  window.addEventListener('locationchange', function () {
+    const newHref = window.location.href;
+    const newPathname = window.location.pathname;
+    if (isPulseView(newPathname) && newHref != href) setTimeout(main(newPathname), 1000);
+  });
+});
+
+function main(pathname){
+  return function() {
+    // Remove any existing timer buttons
+    $('.harvest-timer').remove();
     
-    // remove any existing timer buttons
-   $('.harvest-timer').remove();
+    const tasktitle = $(".slide-panel.open .title-wrapper h2").text();
+    const taskurl = window.location.href;
     
-    var tasktitle = $(".title-wrapper").find(".multiline-ellipsis-component").text();
-    var taskurl = "https://YOUR-SUBDOMAIN-HERE.monday.com/"+path;
-    var taskid = path.substring(path.lastIndexOf('/')+1);
-    var projectid = location.pathname.split('/')[2];
-    var projectname = $("#board-header .board-name").find(".ds-text-component").text();
-  
-    
-    $(".pulse_actions_wrapper").append("<div class='harvest-timer' id='harvest-timer-obj' style='height: 28px; width: 30px; text-align: center; padding-top: 6px; margin-left: 8px; color: #fff; background: #fff; border-radius: 4px; border: 2px solid #f58933;' data-item='{\"id\":\""+taskid+"\", \"name\": \""+tasktitle+"\"}' data-permalink='"+taskurl+"' data-group='{\"id\": \""+projectid+"\", \"name\": \""+projectname+"\" }' >");
+    const taskid = pathname.substring(pathname.lastIndexOf('/')+1);
+    const projectid = location.pathname.split('/')[2];
+    const projectname = $("#board-header .board-name").find(".ds-text-component").text();
+    const actionsWrapper = $(".pulse_actions_wrapper");
+    actionsWrapper.append("<div class='harvest-timer' id='harvest-timer-obj' style='height: 28px; width: 30px; text-align: center; padding-top: 6px; margin-left: 8px; color: #fff; background: #fff; border-radius: 4px; border: 2px solid #f58933;' data-item='{\"id\":\""+taskid+"\", \"name\": \""+tasktitle+"\"}' data-permalink='"+taskurl+"' data-group='{\"id\": \""+projectid+"\", \"name\": \""+projectname+"\" }' >");
     
     $("#harvest-messaging").trigger({
       type: "harvest-event:timers:add",
       element: $("#harvest-timer-obj")
     });
-      
-  }
-  
+  };
 }
 
-$(document).ready(function(){
-
-  var currentpage = window.location.href;
-  
-  setInterval(function(){
-    if (currentpage != window.location.href) {
-      currentpage = window.location.href;
-      urlchanged();
-    }
-  }, 1000);
-});
-
+function isPulseView(path) {
+  return /^\/boards\/\d+\/pulses\/\d+$/.test(path);
+};
