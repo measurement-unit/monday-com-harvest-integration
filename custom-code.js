@@ -14,6 +14,7 @@ $(document).ready(function(){
 });
 
 function main(pathname, href){
+  console.log('Adding Harvest timer to Monday Item');
   return function() {
     // Remove any existing timer buttons
     const timer = $('.harvest-timer');
@@ -37,5 +38,5 @@ function main(pathname, href){
 }
 
 function isPulseView(path) {
-  return /^\/boards\/\d+\/pulses\/\d+$/.test(path);
+  return /^\/boards\/\d+(?:\/views\/\d+)?\/pulses\/\d+$/.test(path);
 };
